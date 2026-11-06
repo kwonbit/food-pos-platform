@@ -13,7 +13,7 @@ Electron 기반 데스크톱 POS의 첫 실행 골격입니다. Electron main pr
 저장소 루트에서:
 
 ```bash
-npm install
+npm --prefix apps/desktop-pos install
 npm run dev:desktop
 ```
 
