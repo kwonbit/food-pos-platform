@@ -12,6 +12,7 @@ export interface PosOrderLine {
 interface CreateOrderInput {
   orderType: "DINE_IN" | "TAKEOUT";
   tableName: string | null;
+  tableId: string | null;
   customerName: string | null;
   requestNote: string | null;
   lines: PosOrderLine[];
@@ -41,6 +42,7 @@ export async function createPosOrder(store: StoreSummary, input: CreateOrderInpu
     order_number: orderNumber,
     order_type: input.orderType,
     table_name: input.tableName,
+    table_id: input.tableId,
     customer_name: input.customerName,
     request_note: input.requestNote,
     order_status: "PENDING",
