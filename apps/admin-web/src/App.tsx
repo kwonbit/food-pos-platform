@@ -5,6 +5,8 @@ import {
   ShoppingBag, Store, TrendingUp, Users, Utensils, Wallet,
 } from "lucide-react";
 import type { OrderStatus, OrderSummary } from "@food-pos/shared-types";
+import { useAuth } from "./auth/AuthProvider";
+import SignInForm from "./auth/SignInForm";
 
 const initialOrders: OrderSummary[] = [
   { id: "1", orderNumber: "A-1048", orderType: "DINE_IN", tableName: "테이블 03", customerName: "김민수", itemSummary: "짜장면 2 · 탕수육(소) 1", totalAmount: 29000, status: "COOKING", paymentStatus: "UNPAID", createdAt: "14:32" },
@@ -21,6 +23,22 @@ const statusText: Record<OrderStatus, string> = {
 const money = (value: number) => new Intl.NumberFormat("ko-KR").format(value) + "원";
 
 export default function App() {
+  const { isConfigured, isLoading, session } = useAuth();
+
+  if (isConfigured && isLoading) {
+    return <main className="auth-loading">인증 세션을 확인하고 있습니다...</main>;
+  }
+
+  if (isConfigured && !session) {
+    return <SignInForm />;
+  }
+
+  return <Dashboard demoMode={!isConfigured} />;
+}
+
+function Dashboard({ demoMode }: { demoMode: boolean }) {
+  const { user, signOut } = useAuth();
+  const [authError, setAuthError] = useState("");
   const [orders, setOrders] = useState(initialOrders);
   const [filter, setFilter] = useState<"ALL" | OrderStatus>("ALL");
   const [query, setQuery] = useState("");
@@ -56,13 +74,15 @@ export default function App() {
         <div className="store-switch"><div className="store-avatar">한</div><div className="store-copy"><strong>한빛 중화요리</strong><small>대표 매장 · 대구</small></div><ChevronDown size={16} /></div>
         <div className="nav-label">WORKSPACE</div>
         <nav>{navItems.map(({ label, icon: Icon, count }) => <button key={label} className={`nav-item ${activeNav === label ? "active" : ""}`} onClick={() => { setActiveNav(label); setMobileNav(false); }}><Icon size={18} /><span>{label}</span>{count && <em>{count}</em>}</button>)}</nav>
-        <div className="sidebar-bottom"><div className="nav-label">SYSTEM</div><button className="nav-item" onClick={() => setActiveNav("설정")}><Settings size={18} /><span>설정</span></button><div className="help-card"><div className="help-icon"><Activity size={17} /></div><strong>운영 상태 양호</strong><p>모든 서비스가 정상적으로 작동 중입니다.</p><span><i /> 시스템 연결됨</span></div><div className="profile"><div className="profile-avatar">권</div><div><strong>매장 관리자</strong><small>admin@foodpos.kr</small></div><MoreHorizontal size={19} /></div></div>
+        <div className="sidebar-bottom"><div className="nav-label">SYSTEM</div><button className="nav-item" onClick={() => setActiveNav("설정")}><Settings size={18} /><span>설정</span></button><div className="help-card"><div className="help-icon"><Activity size={17} /></div><strong>운영 상태 양호</strong><p>모든 서비스가 정상적으로 작동 중입니다.</p><span><i /> 시스템 연결됨</span></div><div className="profile"><div className="profile-avatar">관</div><div><strong>매장 관리자</strong><small>{user?.email ?? "데모 계정 미연결"}</small></div><MoreHorizontal size={19} /></div></div>
       </aside>
 
       <main className="main-content">
-        <header className="topbar"><button className="icon-button mobile-menu" onClick={() => setMobileNav(!mobileNav)} aria-label="메뉴 열기"><Menu size={20} /></button><div className="breadcrumb">매장 운영 <span>/</span> <strong>{activeNav}</strong></div><div className="top-actions"><div className="connection"><i /> 실시간 연결</div><button className="icon-button notification" aria-label="알림"><Bell size={19} /><b /></button><div className="top-divider" /><div className="today">2026년 11월 6일 <ChevronDown size={14} /></div></div></header>
+        <header className="topbar"><button className="icon-button mobile-menu" onClick={() => setMobileNav(!mobileNav)} aria-label="메뉴 열기"><Menu size={20} /></button><div className="breadcrumb">매장 운영 <span>/</span> <strong>{activeNav}</strong></div><div className="top-actions"><div className="connection"><i /> {demoMode ? "데모 모드" : "인증 연결됨"}</div><button className="icon-button notification" aria-label="알림"><Bell size={19} /><b /></button><div className="top-divider" /><div className="today">2026년 11월 6일 <ChevronDown size={14} /></div>{!demoMode && <button className="signout-button" onClick={async () => { const message = await signOut(); setAuthError(message ?? ""); }}>로그아웃</button>}</div></header>
 
         <div className="page-wrap">
+          {demoMode && <div className="demo-notice"><strong>Supabase 미설정 · 데모 모드</strong><span>현재 화면은 샘플 데이터입니다. .env.local 또는 Cloudflare 환경 변수에 Supabase URL과 anon key를 설정하면 로그인 화면이 활성화됩니다.</span></div>}
+          {authError && <div className="auth-inline-error" role="alert">{authError}</div>}
           <section className="welcome-row"><div><div className="eyebrow">FRIDAY, NOVEMBER 06, 2026</div><h1>안녕하세요, 매장 관리자님 <span>👋</span></h1><p>오늘 매장 운영 현황을 한눈에 확인하세요.</p></div><button className="primary-button" onClick={() => { setFilter("ALL"); setQuery(""); }}><Activity size={16} /> 현황 새로고침</button></section>
 
           <section className="stats-grid">
