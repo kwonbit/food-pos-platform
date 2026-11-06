@@ -7,12 +7,13 @@ Windows 설치형 POS와 웹 관리자, 주방 디스플레이, QR/모바일 주
 - [x] React + TypeScript + Vite 기반 관리자 웹 초기 화면
 - [x] 공통 주문/결제 도메인 타입 패키지
 - [x] Supabase 브라우저 클라이언트 및 이메일/비밀번호 인증 기반
-- [ ] 매장별 권한(RLS) 및 실제 데이터 연결
-- [ ] 실제 주문/매출 API 및 데이터베이스 마이그레이션
+- [x] 매장/주문 기본 테이블 및 매장별 RLS 정책
+- [x] 관리자 대시보드의 실제 매장·최근 주문·일일 매출 조회
+- [ ] 주문 생성/상태 변경 API 및 POS 동기화
 - [ ] Electron Windows POS 및 오프라인 SQLite
 - [ ] 주방 디스플레이, 고객 주문 웹
 
-관리자 대시보드의 주문과 매출 숫자는 아직 **화면 확인용 샘플 데이터**입니다. Supabase 인증은 환경 변수가 설정된 경우에만 활성화되며, 실제 주문/매출 테이블과 매장별 RLS 정책은 아직 연결하지 않았습니다.
+Supabase 환경 변수가 설정되지 않은 로컬 미리보기는 데모 데이터를 사용합니다. 인증이 활성화된 경우에는 매장 멤버십으로 접근 가능한 매장과 해당 매장의 실제 주문/일일 집계 데이터를 조회합니다. 첫 매장 및 관리자 UID 연결은 [관리자 대시보드 데이터 설정](docs/admin-dashboard-data-setup.md)을 참고하세요. 주문 등록/상태 변경 API는 후속 작업입니다.
 
 ## 기술 스택
 | 영역 | 기술 |
@@ -116,4 +117,4 @@ Supabase Dashboard → Authentication → URL Configuration에서 실제 Pages �
 - 주요 데이터는 tenant/store 범위와 RLS로 격리합니다.
 - POS 핵심 업무는 로컬 SQLite 트랜잭션과 sync outbox를 기반으로 구현합니다.
 
-자세한 설계는 [docs](docs/architecture.md)를 참고하세요.
+자세한 설계는 [아키텍처](docs/architecture.md)와 [관리자 대시보드 데이터 설정](docs/admin-dashboard-data-setup.md)을 참고하세요.
