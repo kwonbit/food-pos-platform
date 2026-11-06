@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   Activity, Bell, ChevronDown, ClipboardList, Clock3, CreditCard,
   LayoutDashboard, Menu, MoreHorizontal, Package, Search, Settings,
-  ShoppingBag, Store, TrendingUp, Users, Utensils, Wallet, RefreshCw,
+  ShoppingBag, Store, TrendingUp, Users, Utensils, Wallet, RefreshCw, ShoppingCart,
 } from "lucide-react";
 import type { OrderStatus } from "@food-pos/shared-types";
 import { useAuth } from "./auth/AuthProvider";
 import SignInForm from "./auth/SignInForm";
 import MenuManagement from "./MenuManagement";
+import PosSales from "./PosSales";
 import { fetchDashboardData, fetchStores, type DashboardOrder, type StoreSummary } from "./lib/dashboard";
 
 const statusText: Record<OrderStatus, string> = {
@@ -116,6 +117,7 @@ function Dashboard({ demoMode }: { demoMode: boolean }) {
 
   const navItems = [
     { label: "대시보드", icon: LayoutDashboard },
+    { label: "POS 판매", icon: ShoppingCart },
     { label: "주문 관리", icon: ClipboardList, count: metrics.pendingCount },
     { label: "메뉴 관리", icon: Utensils },
     { label: "테이블 관리", icon: Store },
@@ -140,7 +142,7 @@ function Dashboard({ demoMode }: { demoMode: boolean }) {
         <header className="topbar"><button className="icon-button mobile-menu" onClick={() => setMobileNav(!mobileNav)} aria-label="메뉴 열기"><Menu size={20} /></button><div className="breadcrumb">매장 운영 <span>/</span> <strong>{activeNav}</strong></div><div className="top-actions"><div className={`connection ${demoMode ? "demo-connection" : ""}`}><i /> {demoMode ? "데모 모드" : "Supabase 연결됨"}</div><button className="icon-button notification" aria-label="알림"><Bell size={19} /><b /></button><button className="icon-button" aria-label="새로고침" onClick={() => setRefreshKey((value) => value + 1)} disabled={loadingData}><RefreshCw size={17} /></button><div className="top-divider" /><div className="today">{new Intl.DateTimeFormat("ko-KR", { dateStyle: "long", timeZone: selectedStore?.timezone || "Asia/Seoul" }).format(new Date())}</div>{!demoMode && <button className="signout-button" onClick={async () => { const message = await signOut(); setAuthError(message ?? ""); }}>로그아웃</button>}</div></header>
 
         <div className="page-wrap">
-          {activeNav === "메뉴 관리" ? (selectedStore ? <MenuManagement store={selectedStore} /> : <section className="panel onboarding-panel"><div className="onboarding-icon"><Utensils size={22} /></div><h2>메뉴 관리를 시작할 수 없습니다.</h2><p>{demoMode ? "현재 Preview 배포가 데모 모드로 실행 중입니다. Cloudflare Pages의 Preview 환경 변수에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY를 Production과 동일하게 등록한 뒤 다시 배포해 주세요." : loadingStores ? "매장 정보를 불러오고 있습니다..." : dataError ? dataError : "로그인 계정에 연결된 활성 매장을 찾지 못했습니다. 더짬뽕47 매장 멤버십과 권한을 확인해 주세요."}</p></section>) : <>
+          {activeNav === "POS 판매" ? (selectedStore ? <PosSales store={selectedStore} onOrderCreated={() => setRefreshKey((value) => value + 1)} /> : <section className="panel onboarding-panel"><div className="onboarding-icon"><ShoppingCart size={22} /></div><h2>POS 판매를 시작할 수 없습니다.</h2><p>{demoMode ? "실제 매장 주문 접수를 위해 Preview 또는 Production 환경 변수를 설정하고 관리자 계정으로 로그인해 주세요." : loadingStores ? "매장 정보를 불러오고 있습니다..." : dataError ? dataError : "로그인 계정에 연결된 활성 매장을 찾지 못했습니다."}</p></section>) : activeNav === "메뉴 관리" ? (selectedStore ? <MenuManagement store={selectedStore} /> : <section className="panel onboarding-panel"><div className="onboarding-icon"><Utensils size={22} /></div><h2>메뉴 관리를 시작할 수 없습니다.</h2><p>{demoMode ? "현재 Preview 배포가 데모 모드로 실행 중입니다. Cloudflare Pages의 Preview 환경 변수에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY를 Production과 동일하게 등록한 뒤 다시 배포해 주세요." : loadingStores ? "매장 정보를 불러오고 있습니다..." : dataError ? dataError : "로그인 계정에 연결된 활성 매장을 찾지 못했습니다. 더짬뽕47 매장 멤버십과 권한을 확인해 주세요."}</p></section>) : <>
           {demoMode && <div className="demo-notice"><strong>데모 모드</strong><span>현재 주문과 매출은 예시 데이터입니다. Supabase 환경 변수를 설정하면 로그인 후 실제 매장 데이터를 조회합니다.</span></div>}
           {authError && <div className="auth-inline-error" role="alert">{authError}</div>}
           {dataError && <div className="data-error" role="alert"><strong>데이터 조회 오류</strong><span>{dataError}</span><small>Supabase Data API의 public 스키마 노출 설정과 관리자 매장 권한을 확인해 주세요.</small></div>}
