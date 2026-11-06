@@ -39,6 +39,9 @@ export interface DailyStats {
   paidCount: number;
   paidSalesAmount: number;
   averagePaidAmount: number;
+  confirmedCount: number;
+  cookingCount: number;
+  servedCount: number;
 }
 
 export interface DashboardData {
@@ -103,7 +106,7 @@ export async function fetchDashboardData(store: StoreSummary): Promise<Dashboard
       .limit(20),
     supabase
       .from("store_daily_order_stats")
-      .select("order_count, pending_count, paid_count, paid_sales_amount, average_paid_amount")
+      .select("order_count, pending_count, paid_count, paid_sales_amount, average_paid_amount, confirmed_count, cooking_count, served_count")
       .eq("store_id", store.id)
       .eq("business_date", today)
       .maybeSingle(),
@@ -119,6 +122,9 @@ export async function fetchDashboardData(store: StoreSummary): Promise<Dashboard
     paid_count: number;
     paid_sales_amount: number | string;
     average_paid_amount: number | string;
+    confirmed_count: number;
+    cooking_count: number;
+    served_count: number;
   } | null;
 
   return {
@@ -129,6 +135,9 @@ export async function fetchDashboardData(store: StoreSummary): Promise<Dashboard
       paidCount: Number(stats?.paid_count ?? 0),
       paidSalesAmount: Number(stats?.paid_sales_amount ?? 0),
       averagePaidAmount: Number(stats?.average_paid_amount ?? 0),
+      confirmedCount: Number(stats?.confirmed_count ?? 0),
+      cookingCount: Number(stats?.cooking_count ?? 0),
+      servedCount: Number(stats?.served_count ?? 0),
     },
   };
 }
