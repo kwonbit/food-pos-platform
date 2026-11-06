@@ -3,6 +3,7 @@ import { Minus, Plus, Search, ShoppingCart, Trash2, Utensils, X } from "lucide-r
 import type { StoreSummary } from "./lib/dashboard";
 import { fetchMenuCategories, fetchMenus, getMenuImageUrl, type MenuCategory, type MenuItem, type MenuOption } from "./lib/menu";
 import { createPosOrder, type PosOrderLine } from "./lib/pos";
+import { fetchStoreTables, type StoreTable } from "./lib/tables";
 import "./pos-sales.css";
 
 const money = (value: number) => new Intl.NumberFormat("ko-KR").format(value) + "원";
@@ -12,6 +13,8 @@ type SelectedOption = { groupName: string; option: MenuOption };
 export default function PosSales({ store, onOrderCreated }: { store: StoreSummary; onOrderCreated?: () => void }) {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [menus, setMenus] = useState<MenuItem[]>([]);
+  const [tables, setTables] = useState<StoreTable[]>([]);
+  const [tableId, setTableId] = useState("");
   const [categoryId, setCategoryId] = useState("ALL");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -34,6 +37,8 @@ export default function PosSales({ store, onOrderCreated }: { store: StoreSummar
         if (!alive) return;
         setCategories(categoryRows.filter((item) => item.is_active));
         setMenus(menuRows.filter((item) => item.is_available));
+        setTables(tableRows);
+        setTableId((current) => tableRows.some((table) => table.id === current) ? current : tableRows[0]?.id ?? "");
       })
       .catch((caught: unknown) => { if (alive) setError(caught instanceof Error ? caught.message : "판매 메뉴를 불러오지 못했습니다."); })
       .finally(() => { if (alive) setLoading(false); });
@@ -89,17 +94,18 @@ export default function PosSales({ store, onOrderCreated }: { store: StoreSummar
 
   async function submitOrder() {
     if (!cart.length || saving) return;
-    if (orderType === "DINE_IN" && !tableName.trim()) { setError("매장 식사는 테이블명을 입력해 주세요."); return; }
+    if (orderType === "DINE_IN" && !tableId) { setError("테이블 관리에서 테이블을 먼저 등록해 주세요."); return; }
     setSaving(true); setError(""); setNotice("");
     try {
       const orderNumber = await createPosOrder(store, {
         orderType,
-        tableName: orderType === "DINE_IN" ? tableName.trim() : null,
+        tableName: orderType === "DINE_IN" ? (tables.find((table) => table.id === tableId)?.name ?? null) : null,
+        tableId: orderType === "DINE_IN" ? tableId : null,
         customerName: customerName.trim() || null,
         requestNote: requestNote.trim() || null,
         lines: cart,
       });
-      setCart([]); setTableName(""); setCustomerName(""); setRequestNote("");
+      setCart([]); setCustomerName(""); setRequestNote("");
       setNotice(`주문 #${orderNumber} 접수가 완료되었습니다. 주문관리에서 확인할 수 있습니다.`);
       onOrderCreated?.();
     } catch (caught) {
@@ -128,7 +134,7 @@ export default function PosSales({ store, onOrderCreated }: { store: StoreSummar
         <aside className="pos-checkout">
           <div className="pos-cart-heading"><div><ShoppingCart size={18}/><h2>주문 내역</h2></div><span>{totalQuantity}개</span></div>
           <div className="pos-order-type"><button className={orderType === "DINE_IN" ? "active" : ""} onClick={() => setOrderType("DINE_IN")}>매장 식사</button><button className={orderType === "TAKEOUT" ? "active" : ""} onClick={() => setOrderType("TAKEOUT")}>포장</button></div>
-          {orderType === "DINE_IN" && <label className="pos-field">테이블명<input value={tableName} onChange={(event) => setTableName(event.target.value)} placeholder="예: 테이블 01"/></label>}
+          {orderType === "DINE_IN" && <label className="pos-field">테이블 선택<select value={tableId} onChange={(event) => setTableId(event.target.value)}><option value="">테이블을 선택하세요</option>{tables.map((table) => <option key={table.id} value={table.id}>{table.name} · {table.area} · {table.capacity}인석</option>)}</select>{tables.length === 0 && <small>테이블 관리에서 먼저 테이블을 등록해 주세요.</small>}</label>}
           <label className="pos-field">고객명 <span>(선택)</span><input value={customerName} onChange={(event) => setCustomerName(event.target.value)} placeholder="고객명"/></label>
           <div className="pos-cart-list">{cart.length === 0 ? <div className="pos-cart-empty"><ShoppingCart size={25}/><span>메뉴를 선택하면<br/>여기에 주문 내역이 표시됩니다.</span></div> : cart.map((line) => <div className="pos-cart-line" key={line.key}>
             <div className="pos-cart-line-main"><strong>{line.menuName}</strong>{line.optionText && <small>{line.optionText}</small>}<b>{money(line.unitPrice * line.quantity)}</b></div>
