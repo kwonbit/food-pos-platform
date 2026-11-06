@@ -7,6 +7,7 @@ import {
 import type { OrderStatus } from "@food-pos/shared-types";
 import { useAuth } from "./auth/AuthProvider";
 import SignInForm from "./auth/SignInForm";
+import MenuManagement from "./MenuManagement";
 import { fetchDashboardData, fetchStores, type DashboardOrder, type StoreSummary } from "./lib/dashboard";
 
 const statusText: Record<OrderStatus, string> = {
@@ -139,6 +140,7 @@ function Dashboard({ demoMode }: { demoMode: boolean }) {
         <header className="topbar"><button className="icon-button mobile-menu" onClick={() => setMobileNav(!mobileNav)} aria-label="메뉴 열기"><Menu size={20} /></button><div className="breadcrumb">매장 운영 <span>/</span> <strong>{activeNav}</strong></div><div className="top-actions"><div className={`connection ${demoMode ? "demo-connection" : ""}`}><i /> {demoMode ? "데모 모드" : "Supabase 연결됨"}</div><button className="icon-button notification" aria-label="알림"><Bell size={19} /><b /></button><button className="icon-button" aria-label="새로고침" onClick={() => setRefreshKey((value) => value + 1)} disabled={loadingData}><RefreshCw size={17} /></button><div className="top-divider" /><div className="today">{new Intl.DateTimeFormat("ko-KR", { dateStyle: "long", timeZone: selectedStore?.timezone || "Asia/Seoul" }).format(new Date())}</div>{!demoMode && <button className="signout-button" onClick={async () => { const message = await signOut(); setAuthError(message ?? ""); }}>로그아웃</button>}</div></header>
 
         <div className="page-wrap">
+          {activeNav === "메뉴 관리" ? (selectedStore ? <MenuManagement store={selectedStore} /> : <section className="panel onboarding-panel"><div className="onboarding-icon"><Utensils size={22} /></div><h2>메뉴 관리를 시작할 수 없습니다.</h2><p>{demoMode ? "현재 Preview 배포가 데모 모드로 실행 중입니다. Cloudflare Pages의 Preview 환경 변수에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY를 Production과 동일하게 등록한 뒤 다시 배포해 주세요." : loadingStores ? "매장 정보를 불러오고 있습니다..." : dataError ? dataError : "로그인 계정에 연결된 활성 매장을 찾지 못했습니다. 더짬뽕47 매장 멤버십과 권한을 확인해 주세요."}</p></section>) : <>
           {demoMode && <div className="demo-notice"><strong>데모 모드</strong><span>현재 주문과 매출은 예시 데이터입니다. Supabase 환경 변수를 설정하면 로그인 후 실제 매장 데이터를 조회합니다.</span></div>}
           {authError && <div className="auth-inline-error" role="alert">{authError}</div>}
           {dataError && <div className="data-error" role="alert"><strong>데이터 조회 오류</strong><span>{dataError}</span><small>Supabase Data API의 public 스키마 노출 설정과 관리자 매장 권한을 확인해 주세요.</small></div>}
@@ -167,6 +169,7 @@ function Dashboard({ demoMode }: { demoMode: boolean }) {
                 <div className="panel status-panel"><div className="panel-heading"><div><h2>주문 처리 현황</h2><p>오늘 주문 상태별 건수</p></div><span className="live-label"><i /> DB</span></div><div className="status-list">{(["PENDING", "CONFIRMED", "COOKING", "SERVED"] as OrderStatus[]).map((status) => { const demoCount = demoOrders.filter((order) => order.status === status).length; const count = status === "PENDING" ? todayStats.pendingCount : status === "CONFIRMED" ? todayStats.confirmedCount : status === "COOKING" ? todayStats.cookingCount : todayStats.servedCount; return <div className="status-row" key={status}><span><StatusPill status={status} /></span><strong>{(demoMode ? demoCount : count)}건</strong></div>; })}</div><div className="status-total"><span>오늘 전체 주문</span><strong>{metrics.orderCount}건</strong></div></div>
               </div>
             </section>
+          </>}
           </>}
           <footer className="footer"><span>© 2026 Food POS Platform</span><span>버전 0.2.0 · {demoMode ? "데모 모드" : "실제 데이터 연결"}</span></footer>
         </div>
