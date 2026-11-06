@@ -23,11 +23,12 @@ export default function OrderManagement({store}:{store:StoreSummary}) {
   const load = useCallback(async () => { setLoading(true); try { setOrders(await fetchOrders(store)); setError(""); } catch(e) { setError(e instanceof Error?e.message:"주문을 불러오지 못했습니다."); } finally { setLoading(false); } },[store.id]);
   useEffect(()=>{ void load(); },[load]);
   useEffect(()=>{
-    if (!supabase) return;
-    const channel = supabase.channel("orders-"+store.id)
+    const client = supabase;
+    if (!client) return;
+    const channel = client.channel("orders-"+store.id)
       .on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:"store_id=eq."+store.id},()=>{ void load(); })
       .subscribe();
-    return ()=>{ void supabase.removeChannel(channel); };
+    return ()=>{ void client.removeChannel(channel); };
   },[store.id,load]);
   const visible = useMemo(()=>orders.filter(o=>{
     const q=query.trim().toLowerCase();
