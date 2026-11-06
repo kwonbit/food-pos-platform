@@ -1,0 +1,14 @@
+{
+  "name": "food-pos-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Multi-tenant restaurant POS platform",
+  "workspaces": ["apps/admin-web", "packages/shared-types"],
+  "scripts": {
+    "dev": "npm run dev --workspace=@food-pos/admin-web",
+    "build": "npm run build --workspace=@food-pos/admin-web",
+    "preview": "npm run preview --workspace=@food-pos/admin-web",
+    "typecheck": "npm run typecheck --workspace=@food-pos/admin-web"
+  },
+  "engines": { "node": ">=20.0.0", "npm": ">=10.0.0" }
+}
