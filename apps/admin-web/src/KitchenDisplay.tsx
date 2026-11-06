@@ -80,6 +80,14 @@ export default function KitchenDisplay({ store }: { store: StoreSummary }) {
   useEffect(() => {
     const client = supabase;
     if (!client) return;
+    // POS creates the order row first and its order_items rows immediately after.
+    // The orders INSERT event can arrive between those two writes, so defer the
+    // first read and retry once to ensure the nested order_items relation is present.
+    const refreshTimers: number[] = [];
+    const scheduleRefresh = () => {
+      refreshTimers.push(window.setTimeout(() => { void load(); }, 400));
+      refreshTimers.push(window.setTimeout(() => { void load(); }, 1200));
+    };
     const channel = client
       .channel("kitchen-orders-" + store.id)
       .on("postgres_changes", {
@@ -87,9 +95,12 @@ export default function KitchenDisplay({ store }: { store: StoreSummary }) {
         schema: "public",
         table: "orders",
         filter: "store_id=eq." + store.id,
-      }, () => { void load(); })
+      }, scheduleRefresh)
       .subscribe();
-    return () => { void client.removeChannel(channel); };
+    return () => {
+      refreshTimers.forEach((timer) => window.clearTimeout(timer));
+      void client.removeChannel(channel);
+    };
   }, [store.id, load]);
 
   useEffect(() => {
