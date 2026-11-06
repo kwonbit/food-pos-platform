@@ -23,3 +23,12 @@ with check (
   )
 );
 grant update (order_status, payment_status, updated_at) on public.orders to authenticated;
+
+-- Publish order mutations so subscribed admin screens receive realtime events.
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+     and not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'orders') then
+    alter publication supabase_realtime add table public.orders;
+  end if;
+end $$;
