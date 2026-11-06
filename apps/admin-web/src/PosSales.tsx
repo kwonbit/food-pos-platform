@@ -69,7 +69,7 @@ export default function PosSales({ store, onOrderCreated }: { store: StoreSummar
 
   function confirmOptions() {
     if (!activeMenu) return;
-    const groups = activeMenu.menu_option_groups.filter((group) => group.menu_option_groups !== undefined);
+    const groups = activeMenu.menu_option_groups;
     const choices: SelectedOption[] = [];
     for (const group of groups) {
       const optionId = selectedOptions[group.id ?? group.name];
