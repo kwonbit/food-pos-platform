@@ -11,7 +11,9 @@
     "dev": "npm run dev --workspace=@food-pos/admin-web",
     "build": "npm run build --workspace=@food-pos/admin-web",
     "preview": "npm run preview --workspace=@food-pos/admin-web",
-    "typecheck": "npm run typecheck --workspace=@food-pos/admin-web"
+    "typecheck": "npm run typecheck --workspace=@food-pos/admin-web",
+    "dev:desktop": "npm --prefix apps/desktop-pos run dev",
+    "build:desktop:win": "npm --prefix apps/desktop-pos run dist:win"
   },
   "engines": {
     "node": ">=22.0.0",
