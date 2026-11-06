@@ -17,15 +17,15 @@ function isValidSupabaseUrl(value: string | undefined): value is string {
   }
 }
 
-export const isSupabaseConfigured =
-  isValidSupabaseUrl(supabaseUrl) && Boolean(supabaseAnonKey);
+export const supabase =
+  isValidSupabaseUrl(supabaseUrl) && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+        },
+      })
+    : null;
 
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-      },
-    })
-  : null;
+export const isSupabaseConfigured = supabase !== null;
