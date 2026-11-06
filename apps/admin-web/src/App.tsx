@@ -28,7 +28,7 @@ function Dashboard({ demoMode }: { demoMode: boolean }) {
   const [stores, setStores] = useState<StoreSummary[]>([]);
   const [selectedStoreId, setSelectedStoreId] = useState("");
   const [orders, setOrders] = useState<DashboardOrder[]>([]);
-  const [todayStats, setTodayStats] = useState({ orderCount: 0, pendingCount: 0, paidCount: 0, paidSalesAmount: 0, averagePaidAmount: 0 });
+  const [todayStats, setTodayStats] = useState({ orderCount: 0, pendingCount: 0, paidCount: 0, paidSalesAmount: 0, averagePaidAmount: 0, confirmedCount: 0, cookingCount: 0, servedCount: 0 });
   const [filter, setFilter] = useState<"ALL" | OrderStatus>("ALL");
   const [query, setQuery] = useState("");
   const [activeNav, setActiveNav] = useState("대시보드");
@@ -164,7 +164,7 @@ function Dashboard({ demoMode }: { demoMode: boolean }) {
 
               <div className="right-column">
                 <div className="panel quick-panel"><div className="panel-heading"><div><h2>빠른 메뉴</h2><p>자주 사용하는 기능으로 이동합니다.</p></div></div><div className="quick-grid"><QuickAction icon={<ClipboardList />} label="주문 관리" onClick={() => setActiveNav("주문 관리")} /><QuickAction icon={<Utensils />} label="메뉴 등록" onClick={() => setActiveNav("메뉴 관리")} /><QuickAction icon={<CreditCard />} label="매출 정산" onClick={() => setActiveNav("매출 · 정산")} /><QuickAction icon={<Users />} label="직원 관리" onClick={() => setActiveNav("직원 관리")} /></div></div>
-                <div className="panel status-panel"><div className="panel-heading"><div><h2>주문 처리 현황</h2><p>오늘 주문 상태별 건수</p></div><span className="live-label"><i /> DB</span></div><div className="status-list">{(["PENDING", "CONFIRMED", "COOKING", "SERVED"] as OrderStatus[]).map((status) => { const demoCount = demoOrders.filter((order) => order.status === status).length; const count = status === "PENDING" || status === "CONFIRMED" || status === "COOKING" ? todayStats.pendingCount : 0; return <div className="status-row" key={status}><span><StatusPill status={status} /></span><strong>{(demoMode ? demoCount : count)}건</strong></div>; })}</div><div className="status-total"><span>오늘 전체 주문</span><strong>{metrics.orderCount}건</strong></div></div>
+                <div className="panel status-panel"><div className="panel-heading"><div><h2>주문 처리 현황</h2><p>오늘 주문 상태별 건수</p></div><span className="live-label"><i /> DB</span></div><div className="status-list">{(["PENDING", "CONFIRMED", "COOKING", "SERVED"] as OrderStatus[]).map((status) => { const demoCount = demoOrders.filter((order) => order.status === status).length; const count = status === "PENDING" ? todayStats.pendingCount : status === "CONFIRMED" ? todayStats.confirmedCount : status === "COOKING" ? todayStats.cookingCount : todayStats.servedCount; return <div className="status-row" key={status}><span><StatusPill status={status} /></span><strong>{(demoMode ? demoCount : count)}건</strong></div>; })}</div><div className="status-total"><span>오늘 전체 주문</span><strong>{metrics.orderCount}건</strong></div></div>
               </div>
             </section>
           </>}
