@@ -137,7 +137,10 @@ export default function MenuManagement({ store }: { store: StoreSummary }) {
     if (!draft.category_id) { setError("카테고리를 선택해 주세요."); return; }
     if (!Number.isSafeInteger(draft.base_price) || draft.base_price < 0) { setError("메뉴 가격을 확인해 주세요."); return; }
     for (const [index, group] of draft.groups.entries()) {
-      if (group.options.length > 0 && !group.name.trim()) {\n        setError(`옵션 ${index + 1} 그룹명을 입력해 주세요.`); return;\n      }\n      if (group.name.trim() && group.options.some((option) => !option.name.trim())) {
+      if (group.options.length > 0 && !group.name.trim()) {
+        setError(`옵션 ${index + 1} 그룹명을 입력해 주세요.`); return;
+      }
+      if (group.name.trim() && group.options.some((option) => !option.name.trim())) {
         setError(`옵션 ${index + 1}에 이름이 비어 있는 항목이 있습니다.`); return;
       }
       if (group.options.some((option) => !Number.isSafeInteger(option.additional_price) || option.additional_price < 0)) {
