@@ -61,8 +61,10 @@ export default function PosSales({ store, onOrderCreated }: { store: StoreSummar
   }
 
   function chooseMenu(menu: MenuItem) {
-    const groups = menu.menu_option_groups.filter((group) => group.menu_options.some((option) => option.is_available));
-    if (!groups.length) { addToCart(menu); return; }
+    const groups = menu.menu_option_groups;
+    const blockedRequired = groups.find((group) => group.is_required && !group.menu_options.some((option) => option.is_available));
+    if (blockedRequired) { setError(`'${blockedRequired.name}' 필수 옵션에 선택 가능한 항목이 없습니다. 메뉴관리에서 옵션을 확인해 주세요.`); return; }
+    if (!groups.some((group) => group.menu_options.some((option) => option.is_available))) { addToCart(menu); return; }
     setActiveMenu(menu);
     setSelectedOptions({});
   }
