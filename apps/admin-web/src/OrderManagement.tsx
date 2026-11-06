@@ -3,6 +3,7 @@ import { Check, ChevronDown, RefreshCw, Search, X } from "lucide-react";
 import type { StoreSummary } from "./lib/dashboard";
 import { fetchOrders, updateOrderStatus, updatePaymentStatus, type ManagedOrder, type OrderStatus, type PaymentStatus } from "./lib/orders";
 import "./order-management.css";
+import { supabase } from "./lib/supabase";
 
 const statusLabels: Record<OrderStatus,string> = { PENDING:"접수대기", CONFIRMED:"주문확인", COOKING:"조리중", SERVED:"제공완료", CANCELLED:"주문취소" };
 const paymentLabels: Record<PaymentStatus,string> = { UNPAID:"미결제", PARTIAL:"부분결제", PAID:"결제완료", REFUNDED:"환불", PARTIAL_REFUNDED:"부분환불" };
@@ -22,9 +23,12 @@ export default function OrderManagement({store}:{store:StoreSummary}) {
   const load = useCallback(async () => { setLoading(true); try { setOrders(await fetchOrders(store)); setError(""); } catch(e) { setError(e instanceof Error?e.message:"주문을 불러오지 못했습니다."); } finally { setLoading(false); } },[store.id]);
   useEffect(()=>{ void load(); },[load]);
   useEffect(()=>{
-    const channel = (window as any).__noop; void channel;
-    return () => {};
-  },[store.id]);
+    if (!supabase) return;
+    const channel = supabase.channel("orders-"+store.id)
+      .on("postgres_changes",{event:"*",schema:"public",table:"orders",filter:"store_id=eq."+store.id},()=>{ void load(); })
+      .subscribe();
+    return ()=>{ void supabase.removeChannel(channel); };
+  },[store.id,load]);
   const visible = useMemo(()=>orders.filter(o=>{
     const q=query.trim().toLowerCase();
     return (filter==="ALL"||o.order_status===filter) && (!q||[o.order_number,o.customer_name??"",o.customer_phone??"",o.table_name??"",o.delivery_address??"",...o.order_items.map(i=>i.menu_name_snapshot)].some(v=>v.toLowerCase().includes(q)));
