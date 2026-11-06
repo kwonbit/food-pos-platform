@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
-import { Check, ChevronDown, ImagePlus, Pencil, Plus, Search, Trash2, Utensils, X } from "lucide-react";
+import { Check, ImagePlus, Pencil, Plus, Search, Trash2, Utensils, X } from "lucide-react";
 import type { StoreSummary } from "./lib/dashboard";
 import "./menu-management.css";
 import {
