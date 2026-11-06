@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, ChevronDown, RefreshCw, Search, X } from "lucide-react";
+import { Check, RefreshCw, Search, X } from "lucide-react";
 import type { StoreSummary } from "./lib/dashboard";
 import { fetchOrders, updateOrderStatus, updatePaymentStatus, type ManagedOrder, type OrderStatus, type PaymentStatus } from "./lib/orders";
 import "./order-management.css";
