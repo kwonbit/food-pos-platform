@@ -5,7 +5,6 @@
   "description": "Multi-tenant restaurant POS platform",
   "workspaces": [
     "apps/admin-web",
-    "apps/desktop-pos",
     "packages/shared-types"
   ],
   "scripts": {
@@ -13,8 +12,8 @@
     "build": "npm run build --workspace=@food-pos/admin-web",
     "preview": "npm run preview --workspace=@food-pos/admin-web",
     "typecheck": "npm run typecheck --workspace=@food-pos/admin-web",
-    "dev:desktop": "npm run dev --workspace=@food-pos/desktop-pos",
-    "build:desktop:win": "npm run dist:win --workspace=@food-pos/desktop-pos"
+    "dev:desktop": "npm --prefix apps/desktop-pos run dev",
+    "build:desktop:win": "npm --prefix apps/desktop-pos run dist:win"
   },
   "engines": {
     "node": ">=22.0.0",
