@@ -75,15 +75,40 @@ npm run typecheck
 
 빌드 산출물은 `apps/admin-web/dist`에 생성됩니다.
 
-## Cloudflare Pages 설정
-저장소 루트 기준으로 다음과 같이 설정합니다.
+## Cloudflare Pages 배포 설정
 
-- Root directory: `/` (저장소 루트)
-- Build command: `npm run build`
-- Build output directory: `apps/admin-web/dist`
-- Node.js version: `22` 이상
+이 저장소의 관리자 웹은 **Cloudflare Pages 정적 사이트**로 배포합니다. 기존 Workers 서비스의 `npx wrangler deploy` 설정을 그대로 사용하지 말고, Cloudflare 대시보드에서 Pages 프로젝트를 새로 생성해 Git 저장소를 연결하세요. Pages와 Workers는 배포 방식이 다르며, 이 저장소에는 Workers용 Wrangler 배포 설정이 필요하지 않습니다.
 
-기존처럼 Root directory가 저장소 루트이고 Build command가 `npm run build`이면, 루트 package.json의 workspace 스크립트가 관리자 웹을 빌드합니다.
+Pages 프로젝트의 Build settings는 다음과 같이 지정합니다.
+
+| 항목 | 값 |
+|---|---|
+| Framework preset | `None` 또는 `Vite` |
+| Production branch | `main` (변경사항 병합 후) |
+| Root directory | `/` (저장소 루트) |
+| Build command | `npm run build` |
+| Build output directory | `apps/admin-web/dist` |
+| Node.js version | `22` (`.nvmrc` 기준) |
+| Deploy command | Pages에서는 별도 입력하지 않음 |
+
+**중요:** Root directory를 `apps/admin-web`로 지정하면 안 됩니다. npm workspaces와 루트 `package.json` 스크립트를 사용하므로 저장소 루트에서 빌드해야 합니다. 설치 명령은 Cloudflare의 기본 npm 설치를 사용하고, `package-lock.json`이 없는 상태에서는 `npm ci`를 직접 지정하지 마세요.
+
+### Pages 환경 변수
+
+Settings → Environment variables에서 Production과 Preview 환경에 아래 변수를 각각 등록합니다.
+
+- `VITE_SUPABASE_URL`: Supabase Project URL
+- `VITE_SUPABASE_ANON_KEY`: Supabase anon 또는 publishable key
+
+이 값들은 Vite 빌드 시 브라우저 번들에 포함됩니다. publishable/anon 키만 사용하고 `service_role` 또는 secret key는 절대 등록하지 마세요. 값을 추가하거나 수정한 뒤에는 새 배포를 실행해야 합니다.
+
+### Supabase Auth URL 설정
+
+Supabase Dashboard → Authentication → URL Configuration에서 실제 Pages 도메인을 Site URL 및 Redirect URLs에 추가하세요. Preview 배포를 인증에 사용할 경우 해당 Preview 도메인도 허용해야 합니다.
+
+### SPA 경로 처리
+
+`apps/admin-web/public/_redirects`에 Pages SPA fallback을 포함했습니다. Vite 빌드 시 이 파일이 `dist`에 복사되어 클라이언트 라우트 직접 접근/새로고침 시 `index.html`로 처리됩니다.
 
 ## 보안 및 운영 원칙
 - 실제 비밀키는 저장소에 커밋하지 않습니다.
