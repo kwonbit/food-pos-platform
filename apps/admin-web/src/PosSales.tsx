@@ -31,8 +31,8 @@ export default function PosSales({ store, onOrderCreated }: { store: StoreSummar
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    Promise.all([fetchMenuCategories(store.id), fetchMenus(store.id)])
-      .then(([categoryRows, menuRows]) => {
+    Promise.all([fetchMenuCategories(store.id), fetchMenus(store.id), fetchStoreTables(store.id, true)])
+      .then(([categoryRows, menuRows, tableRows]) => {
         if (!alive) return;
         setCategories(categoryRows.filter((item) => item.is_active));
         setMenus(menuRows.filter((item) => item.is_available));
