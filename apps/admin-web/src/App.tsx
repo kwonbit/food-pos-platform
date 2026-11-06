@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   Activity, Bell, ChevronDown, ClipboardList, Clock3, CreditCard,
   LayoutDashboard, Menu, MoreHorizontal, Package, Search, Settings,
@@ -92,7 +92,7 @@ export default function App() {
   );
 }
 
-function StatCard({ label, value, change, note, icon, tone }: { label: string; value: string; change: string; note: string; icon: React.ReactNode; tone: string }) {
+function StatCard({ label, value, change, note, icon, tone }: { label: string; value: string; change: string; note: string; icon: ReactNode; tone: string }) {
   return <div className="stat-card"><div className="stat-top"><span>{label}</span><div className={`stat-icon ${tone}`}>{icon}</div></div><strong className="stat-value">{value}</strong><div className="stat-bottom"><b className={tone === "orange" ? "neutral-change" : ""}>{change}</b><span>{note}</span></div></div>;
 }
 function StatusPill({ status }: { status: OrderStatus }) {
