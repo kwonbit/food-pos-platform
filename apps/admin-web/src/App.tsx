@@ -11,6 +11,7 @@ import MenuManagement from "./MenuManagement";
 import PosSales from "./PosSales";
 import OrderManagement from "./OrderManagement";
 import { fetchDashboardData, fetchStores, type DashboardOrder, type StoreSummary } from "./lib/dashboard";
+import { supabase } from "./lib/supabase";
 
 const statusText: Record<OrderStatus, string> = {
   PENDING: "접수대기", CONFIRMED: "주문확인", COOKING: "조리중",
@@ -85,6 +86,31 @@ function Dashboard({ demoMode }: { demoMode: boolean }) {
       .finally(() => { if (active) setLoadingData(false); });
     return () => { active = false; };
   }, [demoMode, selectedStoreId, refreshKey]);
+
+  useEffect(() => {
+    const client = supabase;
+    if (demoMode || !client || !selectedStore) return;
+
+    const channel = client
+      .channel("dashboard-orders-" + selectedStore.id)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+          filter: "store_id=eq." + selectedStore.id,
+        },
+        () => {
+          setRefreshKey((value) => value + 1);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void client.removeChannel(channel);
+    };
+  }, [demoMode, selectedStoreId]);
 
   const visibleOrders = demoMode ? demoOrders : orders;
   const filteredOrders = useMemo(() => visibleOrders.filter((order) => {
