@@ -23,7 +23,6 @@ export default function PosSales({ store, onOrderCreated }: { store: StoreSummar
   const [activeMenu, setActiveMenu] = useState<MenuItem | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [orderType, setOrderType] = useState<"DINE_IN" | "TAKEOUT">("DINE_IN");
-  const [tableName, setTableName] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [requestNote, setRequestNote] = useState("");
   const [saving, setSaving] = useState(false);
