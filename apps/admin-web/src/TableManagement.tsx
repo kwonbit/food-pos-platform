@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Plus, Pencil, RefreshCw, Store, X } from "lucide-react";
 import type { StoreSummary } from "./lib/dashboard";
 import { fetchStoreTables, saveStoreTable, setStoreTableActive, type StoreTable } from "./lib/tables";
@@ -37,7 +37,7 @@ export default function TableManagement({ store }: { store: StoreSummary }) {
     setForm({ name: table.name, area: table.area, capacity: table.capacity, sort_order: table.sort_order, is_active: table.is_active });
     setShowForm(true); setError(""); setNotice("");
   }
-  async function submit(event: React.FormEvent) {
+  async function submit(event: FormEvent) {
     event.preventDefault();
     if (!form.name.trim() || saving) return;
     setSaving(true); setError(""); setNotice("");
